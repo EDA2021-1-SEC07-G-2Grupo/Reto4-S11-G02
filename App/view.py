@@ -34,10 +34,40 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+
+
+def print_carga_de_datos_info(catalog):
+    print("Cargando información de los archivos ....")
+    print("Se han cargado un total de (Landing points)")
+    print("Se han cargado un total de (conexiones enre landing points)")
+    print("Se han cargado un total de (paises)")
+    print("Primer landing pont cargado:")
+    print("-identificador")
+    print("-nombre")
+    print("-latitud")
+    print("-longitud")
+    print("La ultima información cargada")
+
+
+
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("2- Cantidad de clusters dentro de la red de cables submarinos")
+
+
+def initCatalog():
+    """
+    Inicializa el catalogo de videos
+    """
+    return controller.initCatalog()
+
+def loadData(catalog):
+    """
+    Carga los videos en la estructura de datos
+    """
+    controller.loadData(catalog)
+
 
 catalog = None
 
@@ -49,7 +79,10 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
-
+        catalog = controller.initCatalog()
+        controller.loadData(catalog)
+        print_carga_de_datos_info(catalog)
+        
     elif int(inputs[0]) == 2:
         pass
 
