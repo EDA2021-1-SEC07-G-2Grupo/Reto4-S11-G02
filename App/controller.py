@@ -48,6 +48,7 @@ def loadData(catalog):
     loadConnections(catalog)
     loadCountries(catalog)
     loadLanding_points(catalog)
+    
    
     return catalog
 
@@ -64,29 +65,43 @@ def loadConnections(catalog):
     servicesfile = cf.data_dir + "connections.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-  
+    lastservice=None
     for service in input_file:
         if lastservice is not None:
-            sameservice = lastservice['origin'] == service['origin']
-            samedirection = lastservice['destination'] == service['destination']
-            samebusStop = lastservice['destination'] == service['destination']
+            sameservice = lastservice['cable_name'] == service['cable_name']
+            samedirection = lastservice['cable_rfs'] == service['cable_rfs']
+            samebusStop = lastservice['\ufefforigin'] == service['\ufefforigin']
             if sameservice and samedirection and not samebusStop:
-                model.addStopConnection(analyzer, lastservice, service)
-        
-    model.addRouteConnections(analyzer)
+                model.addConnection_graf(catalog, lastservice, service)
+        lastservice = service
+    
+    model.addRouteConnections(catalog)
 
     return catalog 
 
 
 def loadCountries(catalog):
-    servicesfile = cf.data_dir + "connections.csv"
+    servicesfile = cf.data_dir + "countries.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-    
+    for country in input_file:
+        model.addcountry(catalog,country)
+
+    #for country in servicesfile:
     return catalog 
+
+
 def loadLanding_points(catalog):
+    servicesfile = cf.data_dir + "landing_points.csv"
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=",")
+
+    for landing_pointss in input_file:
+        model.addLanding_points(catalog,landing_pointss)
     return catalog
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+def mpsize(catalog):
+    return model.mpsize(catalog)

@@ -25,6 +25,7 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
+from DISClib.ADT.graph import gr
 
 
 """
@@ -38,9 +39,10 @@ operación solicitada
 
 def print_carga_de_datos_info(catalog):
     print("Cargando información de los archivos ....")
-    print("Se han cargado un total de (Landing points)")
-    print("Se han cargado un total de (conexiones enre landing points)")
-    print("Se han cargado un total de (paises)")
+    print("Se han cargado un total de "+ str(gr.numEdges(catalog["connections"]))+" de arcos conectados")
+    print("Se han cargado un total de "+str(gr.numVertices(catalog["connections"]))+" landing points (vertices)")
+    
+    print("Se han cargado un total de "+str(controller.mpsize(catalog["info_countries"]))+" paises")
     print("Primer landing pont cargado:")
     print("-identificador")
     print("-nombre")
@@ -84,7 +86,8 @@ while True:
         print_carga_de_datos_info(catalog)
         
     elif int(inputs[0]) == 2:
-        pass
+        landing_point1=input("Escriba el nombre del landing point 1")
+        landing_point2=input("Escriba el nombre del landing point 2")
 
     else:
         sys.exit(0)
