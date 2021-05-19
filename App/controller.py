@@ -47,10 +47,10 @@ def loadData(catalog):
 
     loadConnections(catalog)
     loadCountries(catalog)
-    loadLanding_points(catalog)
+    yeah=loadLanding_points(catalog)
     
    
-    return catalog
+    return catalog,yeah
 
   
 
@@ -95,13 +95,19 @@ def loadLanding_points(catalog):
     servicesfile = cf.data_dir + "landing_points.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-
+    for char in input_file:
+        inicial=char
+        break 
     for landing_pointss in input_file:
         model.addLanding_points(catalog,landing_pointss)
-    return catalog
+    final=landing_pointss
+    
+    return catalog,inicial,final
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
 def mpsize(catalog):
     return model.mpsize(catalog)
+def first_map_element(catalog):
+    return model.first_map_element(catalog)

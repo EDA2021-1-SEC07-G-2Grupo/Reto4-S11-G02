@@ -35,27 +35,44 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+def print_separador_sensillo():
+    print("___________________________________________________________________________")
+def print_separador_gigante():
+    print("===========================================================================")
 
 
-def print_carga_de_datos_info(catalog):
+def print_carga_de_datos_info(catalog,elemets):
     print("Cargando información de los archivos ....")
-    print("Se han cargado un total de "+ str(gr.numEdges(catalog["connections"]))+" de arcos conectados")
-    print("Se han cargado un total de "+str(gr.numVertices(catalog["connections"]))+" landing points (vertices)")
-    
-    print("Se han cargado un total de "+str(controller.mpsize(catalog["info_countries"]))+" paises")
-    print("Primer landing pont cargado:")
-    print("-identificador")
-    print("-nombre")
-    print("-latitud")
-    print("-longitud")
-    print("La ultima información cargada")
-
-
+    print_separador_gigante()
+    print("Se ha cargado un total de "+ str(gr.numEdges(catalog["connections"]))+" de conexiones entre arcos")
+    print("Se ha cargado un total de "+str(gr.numVertices(catalog["connections"]))+" landing points conectados")
+    print("Se ha cargado un total de "+str(controller.mpsize(catalog["info_countries"]))+" paises")
+    print_separador_sensillo()
+    print(("primer landing point cargado").upper())
+    print_separador_sensillo()
+    primer_elemeto=elemets[1][1]
+    print("-identificador: "+str(primer_elemeto["landing_point_id"]))
+    print("-nombre: "+str(primer_elemeto["name"]))
+    print("-latitud: "+str(primer_elemeto["latitude"]))
+    print("-longitud: "+str(primer_elemeto["longitude"]))
+    print_separador_sensillo()
+    elemento_final=elemets[1][2]
+    print(("La ultimo landing point cargado:").upper())
+    print_separador_sensillo()
+    print("-identificador: "+str(elemento_final["landing_point_id"]))
+    print("-nombre: "+str(elemento_final["name"]))
+    print("-latitud: "+str(elemento_final["latitude"]))
+    print("-longitud: "+str(elemento_final["longitude"]))
+    print_separador_gigante()
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- Cantidad de clusters dentro de la red de cables submarinos")
+    print("1- Cargar Datos")
+    print("2- Indentificación de clusters de comunicación ")
+    print("3- Identificar los puntos de conexión críticos de la red")
+    print("4- La ruta de menor distancia")
+    print("5- Identificar la Infraestructura Crítica de la Red")
+    print("6- Análisis de fallas")
 
 
 def initCatalog():
@@ -80,14 +97,14 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
-        print("Cargando información de los archivos ....")
         catalog = controller.initCatalog()
-        controller.loadData(catalog)
-        print_carga_de_datos_info(catalog)
+        elments=controller.loadData(catalog)
+        print_carga_de_datos_info(catalog,elments)
         
     elif int(inputs[0]) == 2:
         landing_point1=input("Escriba el nombre del landing point 1")
         landing_point2=input("Escriba el nombre del landing point 2")
+
 
     else:
         sys.exit(0)

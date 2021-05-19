@@ -37,6 +37,7 @@ from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 from DISClib.ADT.graph import gr
+import haversine as hs
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
 los mismos.
@@ -91,6 +92,7 @@ def addLanding_points(catalog,landing_point):
         lApoints=landing_point["landing_point_id"].split(",")
         for char in lApoints:
             addMap(catalog,char,landing_point,"landing_point_id")
+        
 def addConnection_graf(analyzer, lastservice, service):
     """
     Adiciona las estaciones al grafo como vertices y arcos entre las
@@ -252,11 +254,13 @@ def estructure(name):
 
 
 
-
 # Funciones de consulta
 
 def mpsize(catalog):
     return m.size(catalog)
+
+    
+
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
