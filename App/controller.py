@@ -124,5 +124,14 @@ def loadLanding_points(catalog):
 # Funciones de consulta sobre el catálogo
 def mpsize(catalog):
     return model.mpsize(catalog)
+
+
 def first_map_element(catalog):
     return model.first_map_element(catalog)
+
+
+def connectedComponents(analyzer):
+    """
+    Numero de componentes fuertemente conectados
+    """
+    return model.connectedComponents(analyzer)

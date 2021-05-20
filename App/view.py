@@ -104,7 +104,9 @@ while True:
     elif int(inputs[0]) == 2:
         landing_point1=input("Escriba el nombre del landing point 1")
         landing_point2=input("Escriba el nombre del landing point 2")
-
+        print('El número de componentes conectados es: ' +
+        str(controller.connectedComponents(catalog)))
+        
 
     else:
         sys.exit(0)

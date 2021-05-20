@@ -295,6 +295,13 @@ def estructure(name):
 def mpsize(catalog):
     return m.size(catalog)
 
+def connectedComponents(analyzer):
+    """
+    Calcula los componentes conectados del grafo
+    Se utiliza el algoritmo de Kosaraju
+    """
+    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
+    return scc.connectedComponents(analyzer['components'])
     
 
 
