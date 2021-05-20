@@ -60,7 +60,7 @@ def newCatalog():
                     'components': None,
                     'paths': None
                     }
-
+        #GRAFOS
         catalog['destinos'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareIds)
@@ -69,6 +69,8 @@ def newCatalog():
                                               directed=False,
                                               size=14000,
                                               comparefunction=compareIds)
+
+        #MAPAS
         catalog["info_countries"]=m.newMap(numelements=500,
                                             maptype="PROBING",
                                             comparefunction=compareIds)
@@ -94,22 +96,11 @@ def addLanding_points(catalog,landing_point):
             addMap(catalog,char,landing_point,"landing_point_id")
         
 def addConnection_graf(analyzer, lastservice, service):
-    """
-    Adiciona las estaciones al grafo como vertices y arcos entre las
-    estaciones adyacentes.
-
-    Los vertices tienen por nombre el identificador de la estacion
-    seguido de la ruta que sirve.  Por ejemplo:
-
-    75009-10
-
-    Si la estacion sirve otra ruta, se tiene: 75009-101
-    """
+ 
     try:
         origin = vertex_name(lastservice)
         destination = vertex_name(service)
-        length_sin_unidades(lastservice, service)
-        distance = float(service['cable_length'])
+        distance = float(100)
         addpoint(analyzer, origin)
         addpoint(analyzer, destination)
         addConnection(analyzer, origin, destination, distance)
@@ -119,7 +110,27 @@ def addConnection_graf(analyzer, lastservice, service):
     except Exception as exp:
         error.reraise(exp, 'model:addConnection_graf')
 
+def graf_country(catalog,lascontry, country):
+    try: 
+        origin = country_vertex(lastservice)
+        destination = country_vertex(service)
+        distance = float(hs.haversine(float(lascontry["CapitalLatitude"]),float(lascontry["CapitalLongitude"])))
+        addpoint(catalog, origin)
+        addpoint(catalog, destination)
+        addConnection(catalog, origin, destination, distance)
+        addnewpoint(catalog, lascontry)
+        addnewpoint(catalog, country)
+        return catalog
 
+
+    except Exception as exp:
+        error.reraise(exp, 'model:graf_country')
+
+
+def country_vertex(country):
+    name = country['CountryName'] + '-'
+    name = name + country['CapitalName']
+    return name
 
 def addpoint(analyzer, stopid):
     """
@@ -141,6 +152,31 @@ def addConnection(analyzer, origin, destination, distance):
     if edge is None:
         gr.addEdge(analyzer['connections'], origin, destination, distance)
     return analyzer
+
+def addnewpoint(analyzer, service):
+    """
+    Agrega a una estacion, una ruta que es servida en ese paradero
+    """
+   
+    entry = m.get(analyzer['destinos'], service['CountryName'])
+    
+    if entry is None:
+        lstroutes = lt.newList(cmpfunction=compareIds)
+        lt.addLast(lstroutes, service['CapitalName'])
+        m.put(analyzer['destinos'], service['CountryName'], lstroutes)
+    else:
+        lstroutes = entry['value']
+        
+        info = service['CapitalName']
+        
+        if info not in lstroutes :
+           
+            lt.addLast(lstroutes, info)
+        else:
+            print(0)
+           
+    return analyzer
+
 
 def addRouteStop(analyzer, service):
     """

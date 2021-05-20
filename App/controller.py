@@ -84,8 +84,17 @@ def loadCountries(catalog):
     servicesfile = cf.data_dir + "countries.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
+    lastservice=None
     for country in input_file:
         model.addcountry(catalog,country)
+        if lastservice is not None:
+            sameservice = lastservice['CountryName'] == country['CountryName']
+            samedirection = lastservice['CapitalName'] == country['CapitalName']
+            samebusStop = lastservice['CapitalName'] == country['CapitalName']
+            if sameservice and samedirection and not samebusStop:
+                model.addConnection_graf(catalog, lastservice, country)
+        lastservice = country
+    model.addRouteConnections(catalog)
 
     #for country in servicesfile:
     return catalog 
@@ -98,9 +107,15 @@ def loadLanding_points(catalog):
     for char in input_file:
         inicial=char
         break 
+   
     for landing_pointss in input_file:
         model.addLanding_points(catalog,landing_pointss)
+    
+    
     final=landing_pointss
+    
+
+    
     
     return catalog,inicial,final
 
