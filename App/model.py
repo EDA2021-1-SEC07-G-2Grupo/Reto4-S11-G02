@@ -95,28 +95,31 @@ def addLanding_points(catalog,landing_point):
         for char in lApoints:
             addMap(catalog,char,landing_point,"landing_point_id")
         
-def addConnection_graf(analyzer, lastservice, service):
+def addConnection_graf(analyzer, service):
  
     try:
-        origin = vertex_name(lastservice)
-        destination = vertex_name(service)
-        distance = float(100)
+        pont1=ciudad(analyzer,service["\ufefforigin"])
+        pont2=ciudad(analyzer,service["destination"])
+        origin = vertex_name(analyzer,service["\ufefforigin"],pont1)
+    
+        destination = vertex_name(analyzer,service["destination"],pont2)
+        distance = length_sin_unidades(service["cable_length"])
+
         addpoint(analyzer, origin)
         addpoint(analyzer, destination)
         addConnection(analyzer, origin, destination, distance)
-        addRouteStop(analyzer, service)
-        addRouteStop(analyzer, lastservice)
+        addRouteStop(analyzer, service,str(pont1))
+        addRouteStop(analyzer, service,str(pont2))
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addConnection_graf')
 
 def graf_country(catalog,lascontry, country):
     try: 
-        origin = country_vertex(lastservice)
-        destination = country_vertex(service)
+        origin = country_vertex(lascontry)
+        destination = country_vertex(country)
         distance = float(hs.haversine(float(lascontry["CapitalLatitude"]),float(lascontry["CapitalLongitude"])))
-        addpoint(catalog, origin)
-        addpoint(catalog, destination)
+        
         addConnection(catalog, origin, destination, distance)
         addnewpoint(catalog, lascontry)
         addnewpoint(catalog, country)
@@ -139,18 +142,27 @@ def addpoint(analyzer, stopid):
     try:
         if not gr.containsVertex(analyzer['connections'], stopid):
             gr.insertVertex(analyzer['connections'], stopid)
+            
+          
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addpoint')
 
 
 def addConnection(analyzer, origin, destination, distance):
+
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(analyzer['connections'], origin, destination)
+   
+
+    edge = gr.getEdge(analyzer['connections'], str(origin), str(destination))
+
+    
     if edge is None:
-        gr.addEdge(analyzer['connections'], origin, destination, distance)
+        
+       
+        gr.addEdge(analyzer['connections'], str(origin), str(destination), (distance))
     return analyzer
 
 def addnewpoint(analyzer, service):
@@ -178,21 +190,22 @@ def addnewpoint(analyzer, service):
     return analyzer
 
 
-def addRouteStop(analyzer, service):
+def addRouteStop(analyzer, service,name):
     """
     Agrega a una estacion, una ruta que es servida en ese paradero
     """
-   
+
     entry = m.get(analyzer['destinos'], service['\ufefforigin'])
+
     
     if entry is None:
         lstroutes = lt.newList(cmpfunction=compareIds)
-        lt.addLast(lstroutes, service['cable_name'])
+        lt.addLast(lstroutes, name)
         m.put(analyzer['destinos'], service['\ufefforigin'], lstroutes)
     else:
         lstroutes = entry['value']
         
-        info = service['cable_name']
+        info = name
         
         if info not in lstroutes :
            
@@ -214,10 +227,15 @@ def addRouteConnections(analyzer):
         lstroutes = m.get(analyzer['destinos'], key)['value']
         prevrout = None
         for route in lt.iterator(lstroutes):
+
             route = key + '-' + route
-            if prevrout is not None:
-                addConnection(analyzer, prevrout, route, 0)
-                addConnection(analyzer, route, prevrout, 0)
+            
+            """if prevrout is not None:
+                print(prevrout)
+                print(route)
+                addConnection(analyzer, prevrout, route, float(0))
+                addConnection(analyzer, route, prevrout, float(0))"""
+            
             prevrout = route
 
 
@@ -241,40 +259,52 @@ def addMap(catalog, indexs, content,map_name):
 """ESTRUCTURAS"""
 
 
-def vertex_name(service):
+def vertex_name(catalog,service,ciudad_name):
     """
-    Nombre del vertice es la combinación del origen y el nombre del cable
+    Nombre del vertice es la combinación del codio  y la ciudad 
     """
-    name = service['\ufefforigin'] + '-'
-    name = name + service['cable_name']
-    return name
+    
 
-def length_sin_unidades(lastservice, service):
+
+
+    name = service + '-'
+    name = name + ciudad_name
+
+    return name
+def ciudad(catalog,service):
+    if m.contains(catalog["landing_point_id"],service)==True:
+        lista=m.get(catalog["landing_point_id"],service)
+        elemnto=lt.getElement(lista["value"]["song"],1)
+        city=elemnto["name"].split(",")
+    
+        ciudad_name=str(city[0])
+    else:
+        ciudad_name="No city"
+
+    return ciudad_name
+
+
+
+def length_sin_unidades( service):
     """
         En caso que no exista un dato para la longitud del cable se remplaza por 0 y 
         se quita las unidades
     """
-
-    if service['cable_length'] == 'n.a.':
-        service['cable_length'] = 0
-    elif service['cable_length'] != 'n.a.':
-        numero_sin_units=service["cable_length"].split(" ")
+  
+    if service == 'n.a.':
+        service = float(1000000)
+    elif service != 'n.a.':
+        numero_sin_units=service.split(" ")
         num=numero_sin_units[0].split(",")
         novo_num=""
         for char in num:
             novo_num+=char
         
-        service["cable_length"]=novo_num
+        service =novo_num
+      
+        return float(service)
         
-    if lastservice['cable_length'] == 'n.a.':
-        lastservice['cable_length'] = 0
-    elif lastservice['cable_length'] != 'n.a.':
-        numero_sin_units=lastservice["cable_length"].split(" ")
-        num=numero_sin_units[0].split(",")
-        novo_num=""
-        for char in num:
-            novo_num+=char
-        lastservice["cable_length"]=novo_num
+  
 
 
 def estructure(name):
@@ -295,6 +325,7 @@ def estructure(name):
 def mpsize(catalog):
     return m.size(catalog)
 
+    
 def connectedComponents(analyzer):
     """
     Calcula los componentes conectados del grafo
@@ -302,8 +333,6 @@ def connectedComponents(analyzer):
     """
     analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
     return scc.connectedComponents(analyzer['components'])
-    
-
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista

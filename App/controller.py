@@ -44,10 +44,12 @@ def initCatalog():
 # Funciones para la carga de datos
 
 def loadData(catalog):
-
-    loadConnections(catalog)
-    loadCountries(catalog)
     yeah=loadLanding_points(catalog)
+    loadCountries(catalog)
+    
+    loadConnections(catalog)
+    
+    
     
    
     return catalog,yeah
@@ -66,15 +68,11 @@ def loadConnections(catalog):
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
     lastservice=None
-    for service in input_file:
-        if lastservice is not None:
-            sameservice = lastservice['cable_name'] == service['cable_name']
-            samedirection = lastservice['cable_rfs'] == service['cable_rfs']
-            samebusStop = lastservice['\ufefforigin'] == service['\ufefforigin']
-            if sameservice and samedirection and not samebusStop:
-                model.addConnection_graf(catalog, lastservice, service)
-        lastservice = service
-    
+    for service in input_file: 
+               
+            model.addConnection_graf(catalog, service)
+            
+        
     model.addRouteConnections(catalog)
 
     return catalog 
@@ -124,11 +122,8 @@ def loadLanding_points(catalog):
 # Funciones de consulta sobre el catálogo
 def mpsize(catalog):
     return model.mpsize(catalog)
-
-
 def first_map_element(catalog):
     return model.first_map_element(catalog)
-
 
 def connectedComponents(analyzer):
     """
