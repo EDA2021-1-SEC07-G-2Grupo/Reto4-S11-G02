@@ -64,7 +64,19 @@ def print_carga_de_datos_info(catalog,elemets):
     print("-latitud: "+str(elemento_final["latitude"]))
     print("-longitud: "+str(elemento_final["longitude"]))
     print_separador_gigante()
+
+
+
+def print_req1(catalog):
     
+    print('El número total de componentes conectados es: ' +
+        str(controller.connectedComponents(catalog)))
+    print("Número total de clústeres presentes en la red")
+    print ("Informar si los dos landing points están en el mismo clúster o no.  ")
+
+
+
+ 
 def printMenu():
     print("Bienvenido")
     print("1- Cargar Datos")
@@ -101,12 +113,11 @@ while True:
         elments=controller.loadData(catalog)
         print_carga_de_datos_info(catalog,elments)
         
-        
+
     elif int(inputs[0]) == 2:
         landing_point1=input("Escriba el nombre del landing point 1: ")
         landing_point2=input("Escriba el nombre del landing point 2: ")
-        print('El número de componentes conectados es: ' +
-        str(controller.connectedComponents(catalog)))
+        print_req1(catalog)
 
 
 
