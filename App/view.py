@@ -26,6 +26,7 @@ import controller
 from DISClib.ADT import list as lt
 assert cf
 from DISClib.ADT.graph import gr
+from DISClib.ADT import map as m
 
 
 """
@@ -65,6 +66,33 @@ def print_carga_de_datos_info(catalog,elemets):
     print("-longitud: "+str(elemento_final["longitude"]))
     print_separador_gigante()
 
+
+
+def print_req1(catalog):
+    
+    print('El número total de componentes conectados es: ' +
+        str(controller.connectedComponents(catalog)))
+    print("Número total de clústeres presentes en la red")
+    print ("Informar si los dos landing points están en el mismo clúster o no.  ")
+
+
+def print_req2(catalog):
+    print("Encontrando los landing point que sirven como punto de interconexión a más cables en la red...")
+    lista_puntos_criticos=controller.consulta_conexion_criticos(catalog)
+    for element in lt.iterator(lista_puntos_criticos):
+        print("Nombre: "+str(element["name"]))
+        print("País: "+str(element["Pais"]))
+        print("Identificador: "+str(element["identificador"]))
+        print("Conexiones a landing_point de diferentes cables: "+str(element["conectados"]))
+        print_separador_sensillo()
+
+    
+    
+def print_req3():
+    print("Ruta más corta entre")
+    print("Distancia total de la ruta")
+
+    
 def printMenu():
     print("Bienvenido")
     print("1- Cargar Datos")
@@ -101,11 +129,23 @@ while True:
         elments=controller.loadData(catalog)
         print_carga_de_datos_info(catalog,elments)
         
+
     elif int(inputs[0]) == 2:
-        landing_point1=input("Escriba el nombre del landing point 1")
-        landing_point2=input("Escriba el nombre del landing point 2")
-        print('El número de clusters es: ' + str(controller.connectedComponents(catalog)))
-        
+        landing_point1=input("Escriba el nombre del landing point 1: ")
+        landing_point2=input("Escriba el nombre del landing point 2: ")
+        print_req1(catalog)
+
+
+
+
+    elif int(inputs[0]) == 3:
+        print_req2(catalog)#FUNCIONA
+
+
+    elif int (inputs[0])==4:
+        pais1=str(input("Escriba el primer país"))
+        pais2=str(input("Escriba el segundo país"))
+        print_req3()
 
     else:
         sys.exit(0)
