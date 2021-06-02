@@ -123,12 +123,11 @@ def mpsize(catalog):
 def first_map_element(catalog):
     return model.first_map_element(catalog)
 
-def consulta_conexion_criticos(catalog):
-    return model.consulta_conexion_criticos (catalog) 
+
 
 
     
-
+# REQUERIMENTO 1--------------------------------------------------
 def req1(catalog,v1,v2):
 
     cantidad=model.connectedComponents(catalog)
@@ -147,16 +146,29 @@ def req1(catalog,v1,v2):
     elif T_f== False:
         texto=("No existe/existen los vertices mencionados")
         return texto,cantidad
-        
+# REQUERIMENTO 2 ----------------------------------------------------------- 
+# 
+#  
+def req2(catalog):
+    return model.consulta_conexion_criticos (catalog) 
 
+
+# REQUERIMIENTO 3---------------------------------------------------------
 def req3(catalog,pais1,pais2):
     ciudad1=model.getcity(catalog,pais1)
     ciudad2=model.getcity(catalog,pais2)
    
-    if ciudad2 != None or ciudad1 != None:
-
+    if ciudad2 != None and ciudad1 != None:
+       
         model.dijkstra_path(catalog,ciudad1)
         min_cost_to_2= model.dijkstra_llegada(catalog,ciudad2)
         return min_cost_to_2
     else:
         return "No se ha encontrado los/el pais que está buscando "
+def des_vertice(v):
+   
+    v=v.split("-")
+    if len(v)>1:
+        return str(v[1])
+    else:
+        return str(v[0])

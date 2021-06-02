@@ -39,7 +39,7 @@ operación solicitada
 """
 
 def print_separador_sensillo():
-    print("___________________________________________________________________________")
+    print("---------------------------------------------------------------------------")
 def print_separador_gigante():
     print("===========================================================================")
 
@@ -86,10 +86,8 @@ def print_req1(catalog,v1,v2):
 def print_req2(catalog):
 
 
-
-
     print("Encontrando los landing point que sirven como punto de interconexión a más cables en la red...")
-    lista_puntos_criticos=controller.consulta_conexion_criticos(catalog)
+    lista_puntos_criticos=controller.req2(catalog)
     for element in lt.iterator(lista_puntos_criticos):
         print("Nombre: "+str(element["name"]))
         print("País: "+str(element["Pais"]))
@@ -105,17 +103,26 @@ def print_req3(catalog, pais1, pais2):
 
 
     path=controller.req3(catalog,pais1,pais2)
-    
+    recorrido=0
+    print_separador_gigante()
+    print("Ruta:")
+    print_separador_sensillo()
     if path is not None:
         if "No se ha encontrado los/el pais que está buscando " not in path:
-            pathlen = stack.size(path)
-            print('El camino es de : ' + str(pathlen)+' km. ')
+            
             while (not stack.isEmpty(path)):
                 point = stack.pop(path)
-                print(point)
+                recorrido+=int(point["weight"])
+                print( "Landig Point A: "+str(controller.des_vertice(point["vertexA"]))+", "+" Landig Point B: "+str(controller.des_vertice(point["vertexB"]))+", "+" Distancia: "+str(point["weight"])+" km")
+                print_separador_sensillo()
+            print("El recorrido total es de: "+str(recorrido)+"km")
         else:
+            print_separador_sensillo()
             print(path)
+           
+            
     else:
+        print_separador_sensillo()
         print("No se ha encontrado un camino")
 
 

@@ -135,6 +135,7 @@ def addConnection_graf(analyzer, service):
 
         distance = distance_haversine(analyzer,origin,destination)#Entre los 2 puntos
         distance=abs(distance)
+        
        
 
 
@@ -380,7 +381,8 @@ def estructure(name):#ESTRUCTURA MAPA
 
 
 def distance_haversine(catalog,lugar1,lugar2):
-    
+    lugar1=des_vertice(lugar1)
+    lugar2=des_vertice(lugar2)
     datos_1=m.get(catalog["ciudad_id"],lugar1)
  
 
@@ -396,10 +398,14 @@ def distance_haversine(catalog,lugar1,lugar2):
         lugar1=(float(dato1["latitude"]),float(dato1["longitude"]))
         lugar2=(float(dato2["latitude"]),float(dato2["longitude"]))
         return float(hs.haversine(lugar1,lugar2))
-
+def des_vertice(v):
+   
+    v=v.split("-")
+    return str(v[0])
           
 def distance_haversine_special(catalog,lugar1,lugar2):
-    
+    lugar1=des_vertice(lugar1)
+    lugar2=des_vertice(lugar2)
     datos_1=m.get(catalog["ciudad_id"],lugar1)
     datos_2=m.get(catalog["capital"],lugar2)
   
@@ -490,6 +496,7 @@ def getcity(catalog,pais):
         return elemento["CapitalName"]
 
 def dijkstra_path(catalog,ciudad1): 
+       
         catalog['paths'] = djk.Dijkstra(catalog['connections'], ciudad1)
         return catalog
         
