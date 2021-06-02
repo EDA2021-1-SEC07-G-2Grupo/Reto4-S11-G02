@@ -25,7 +25,7 @@
  """
 
 
-from DISClib.DataStructures.arraylist import firstElement
+from DISClib.DataStructures.arraylist import addLast, firstElement
 from App.controller import loadCountries
 from typing import ClassVar
 import config as cf
@@ -61,28 +61,32 @@ def newCatalog():
                     'components': None,
                     'paths': None
                     }
+        #Datos
+        catalog["original_info"]=lt.newList(datastructure="ARRAY_LIST")
         #GRAFOS
         catalog['destinos'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareIds)
 
         catalog['connections'] = gr.newGraph(datastructure='ADJ_LIST',#grafo adjacente
-                                              directed=False,
+                                              directed=True,
                                               size=14000,
                                               comparefunction=compareIds)
         catalog["stos_cable_name"]= m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareIds)
-        catalog['connections_by_cable'] = gr.newGraph(datastructure='ADJ_LIST',#grafo adjacente
-                                              directed=False,
-                                              size=14000,
-                                              comparefunction=compareIds)
 
         #MAPAS
         catalog["info_countries"]=m.newMap(numelements=500,
                                             maptype="PROBING",
                                             comparefunction=compareIds)
         catalog["landing_point_id"]=m.newMap(numelements=500,
+                                            maptype="PROBING",
+                                            comparefunction=compareIds)
+        catalog["ciudad_id"]=m.newMap(numelements=500,
+                                            maptype="PROBING",
+                                            comparefunction=compareIds)
+        catalog["capital"]=m.newMap(numelements=500,
                                             maptype="PROBING",
                                             comparefunction=compareIds)
         return catalog
@@ -96,39 +100,78 @@ def addcountry(catalog,country):
         countries=country["CountryName"].split(",")
         for content in countries:
             addMap(catalog, content, country,"info_countries")
+        countries=country["CapitalName"].split(",")
+        addMap(catalog, countries[0], country,"capital")
 
 
 def addLanding_points(catalog,landing_point):
         lApoints=landing_point["landing_point_id"].split(",")
         for char in lApoints:
+        
             addMap(catalog,char,landing_point,"landing_point_id")
+        ciudad=landing_point["name"].split(",")
+
+        addMap(catalog,ciudad[0],landing_point,"ciudad_id")
+
+def addconnections(catalog,service):
+    lt.addLast(catalog["original_info"],service)
         
 def addConnection_graf(analyzer, service):
  
     try:
-        pont1=ciudad(analyzer,service["\ufefforigin"])
-        pont2=ciudad(analyzer,service["destination"])
-        origin = vertex_name(analyzer,service["\ufefforigin"],pont1)
-    
-        destination = vertex_name(analyzer,service["destination"],pont2)
-        distance = length_sin_unidades(service["cable_length"])#lo voy a cambiar a cordenadas
+        pont1=pais(analyzer,service["\ufefforigin"])#PUNTO GRANDE QUE ES UN PAÍS
+        pont2=pais(analyzer,service["destination"])#PUNTO GRANDE QUE ES EL POSIBLE SEGUNDO PAÍS
+        
+      
+
+        ciudad1=ciudad(analyzer,service["\ufefforigin"])
+        ciudad2=ciudad(analyzer,service["destination"])
+       
+
+        origin = vertex_name( ciudad1,service["\ufefforigin"])
+        destination = vertex_name(ciudad2,service["destination"])
+
+     
+
+        distance = distance_haversine(analyzer,origin,destination)#Entre los 2 puntos
+        distance=abs(distance)
+       
+
 
         addpoint(analyzer, origin,"connections")
         addpoint(analyzer, destination,"connections")
-        addConnection(analyzer, origin, destination, distance,"connections")
-        addRouteStop(analyzer, service,str(pont1),"destinos")
-        addRouteStop(analyzer, service,str(pont2),"destinos")
+
+        #PUNTOS ESPECIALES 
+        addpoint(analyzer, pont1,"connections")
+        addpoint(analyzer,pont2,"connections")
+
+        #CONEXIONES
+        addConnection(analyzer, origin, destination, distance,"connections")#conexion en las 2 rutas
+        
+        distance1=abs(distance_haversine_special(analyzer,origin,pont1))
+       
+        
+       
+        distance2=abs(distance_haversine_special(analyzer,origin,pont2))
+    
+       
+        addConnection(analyzer, origin, pont1, distance1,"connections")
+        addConnection(analyzer, destination, pont2, distance2,"connections")
+        
+
+
+        addnewpoint(analyzer, origin, destination)#TRABAJANDO EN ESTE PUNTO
+        addnewpoint(analyzer, destination,origin)
+        addnewpoint(analyzer, pont1,origin)
+        addnewpoint(analyzer, pont2, destination)
+        addnewpoint(analyzer,origin, pont1 )
+        addnewpoint(analyzer, destination,pont2 )
+        
+        addRouteStop(analyzer, service["\ufefforigin"],service["cable_name"],"stos_cable_name")
+        addRouteStop(analyzer, service["destination"],service["cable_name"],"stos_cable_name")
         #COMIENZO DEL GRAFO 2 ------------------------------------------------
        
-        origin = vertex_name(analyzer,service["\ufefforigin"],service["cable_name"]) 
-        destination = vertex_name(analyzer,service["destination"],service["cable_name"])
-        distance = length_sin_unidades(service["cable_length"])
-
-        addpoint(analyzer, origin,"connections_by_cable")
-        addpoint(analyzer, destination,"connections_by_cable")
-        addConnection(analyzer, origin, destination, distance,"connections_by_cable")
-        addRouteStop(analyzer, service,service["cable_name"],"stos_cable_name")
-        addRouteStop(analyzer, service,service["cable_name"],"stos_cable_name")
+       
 
 
         return analyzer
@@ -137,10 +180,6 @@ def addConnection_graf(analyzer, service):
 
 
 
-def country_vertex(country):
-    name = country['CountryName'] + '-'
-    name = name + country['CapitalName']
-    return name
 
 def addpoint(analyzer, stopid,name_analyzer):
     """
@@ -156,45 +195,49 @@ def addpoint(analyzer, stopid,name_analyzer):
         error.reraise(exp, 'model:addpoint')
 
 
+
 def addConnection(analyzer, origin, destination, distance,name_analyzer):#CREO CONECCIONES PARA EL GRAFO CONNECTIONS
 
     """
     Adiciona un arco entre dos estaciones
     """
-   
-
-    edge = gr.getEdge(analyzer[name_analyzer], str(origin), str(destination))
-
+    if  "No city" in origin or "No Country" in destination or "No city" in destination:
+        return analyzer
     
-    if edge is None:
+    else:
+        edge = gr.getEdge(analyzer[name_analyzer], str(origin), str(destination))
+     
+
+        if edge is None:
+            
         
-       
-        gr.addEdge(analyzer[name_analyzer], str(origin), str(destination), (distance))
+            gr.addEdge(analyzer[name_analyzer], str(origin), str(destination), (distance))
     return analyzer
 
-def addnewpoint(analyzer, service):#PERTENECE AL GRAFO DE PAISES (PRONTO VA A SER INUTIL)
-    """
+def addnewpoint(analyzer, service,conexion):
 
-    """
+    
    
-    entry = m.get(analyzer['destinos'], service['CountryName'])
+    entry = m.get(analyzer['destinos'], service)
+  
     
     if entry is None:
-        lstroutes = lt.newList(cmpfunction=compareIds)
-        lt.addLast(lstroutes, service['CapitalName'])
-        m.put(analyzer['destinos'], service['CountryName'], lstroutes)
+        lstroutes = lt.newList(datastructure="ARRAY_LIST",cmpfunction=compareIds)
+        lt.addLast(lstroutes, conexion )
+        m.put(analyzer['destinos'], service, lstroutes)
     else:
         lstroutes = entry['value']
         
-        info = service['CapitalName']
-        
-        if info not in lstroutes :
+        info = str(service)
+      
+        if info not in lstroutes["elements"]:
            
             lt.addLast(lstroutes, info)
-        else:
-            print(0)
+        
            
     return analyzer
+
+
 
 
 def addRouteStop(analyzer, service,name,diccionario):#PARA AÑADIR EN LOS DICCIONARIOS DIRECTOS DE ID PAIS
@@ -202,13 +245,13 @@ def addRouteStop(analyzer, service,name,diccionario):#PARA AÑADIR EN LOS DICCIO
 
     """
 
-    entry = m.get(analyzer[diccionario], service['\ufefforigin'])
+    entry = m.get(analyzer[diccionario], service)
 
     
     if entry is None:
         lstroutes = lt.newList(cmpfunction=compareIds)
         lt.addLast(lstroutes, name)
-        m.put(analyzer[diccionario], service['\ufefforigin'], lstroutes)
+        m.put(analyzer[diccionario], service, lstroutes)
     else:
         lstroutes = entry['value']
         
@@ -224,28 +267,6 @@ def addRouteStop(analyzer, service,name,diccionario):#PARA AÑADIR EN LOS DICCIO
 
 
 
-def addRouteConnections(analyzer):#ES INUTIL PERO LA VOY A USAR PARA LOS PAISES
-    """
-    Por cada vertice (cada estacion) se recorre la lista
-    de rutas servidas en dicha estación y se crean
-    arcos entre ellas para representar el cambio de ruta
-    que se puede realizar en una estación.
-    """
-    lststops = m.keySet(analyzer['destinos'])
-    for key in lt.iterator(lststops):
-        lstroutes = m.get(analyzer['destinos'], key)['value']
-        prevrout = None
-        for route in lt.iterator(lstroutes):
-
-            route = key + '-' + route
-            
-            """if prevrout is not None:
-                print(prevrout)
-                print(route)
-                addConnection(analyzer, prevrout, route, float(0))
-                addConnection(analyzer, route, prevrout, float(0))"""
-            
-            prevrout = route
 
 
 
@@ -254,7 +275,7 @@ def addRouteConnections(analyzer):#ES INUTIL PERO LA VOY A USAR PARA LOS PAISES
 
 
 def addMap(catalog, indexs, content,map_name):#PARA CREAR MAPAS
-
+  
     indices = catalog[map_name]
     existencia_indice = m.contains(indices, indexs)
     if existencia_indice:
@@ -268,14 +289,14 @@ def addMap(catalog, indexs, content,map_name):#PARA CREAR MAPAS
 """ESTRUCTURAS"""
 
 
-def vertex_name(catalog,service,ciudad_name):#PARA EL GRAFO DE ID Y PAÍS
+def vertex_name(service,ciudad_name):#PARA EL GRAFO DE ID Y PAÍS
     """
     Nombre del vertice es la combinación del codio  y la ciudad 
     """
 
 
     name = service + '-'
-    name = name + ciudad_name
+    name = name+ciudad_name
 
     return name
 
@@ -284,9 +305,9 @@ def ciudad(catalog,service):#PARA ENCONTRAR EL PAÍS
     if m.contains(catalog["landing_point_id"],service)==True:
         lista=m.get(catalog["landing_point_id"],service)
         elemnto=lt.getElement(lista["value"]["song"],1)
-        city=elemnto["name"].split(",")
+        city=elemnto["name"].split(", ")
         if len(city)==2:
-            ciudad_name=str(city[1])
+            ciudad_name=str(city[0])
         else:
             ciudad_name=str(city[0])
     else:
@@ -296,6 +317,32 @@ def ciudad(catalog,service):#PARA ENCONTRAR EL PAÍS
     return ciudad_name
 
 
+def pais(catalog,service):#PARA ENCONTRAR EL PAÍS
+
+    if m.contains(catalog["landing_point_id"],service)==True:
+        lista=m.get(catalog["landing_point_id"],service)
+        elemnto=lt.getElement(lista["value"]["song"],1)
+        city=elemnto["name"].split(", ")
+        if len(city)==2:
+            ciudad_name=str(city[1])
+            
+
+        else:
+            ciudad_name=str(city[0])
+        elementosss=m.get(catalog["info_countries"],ciudad_name)
+        if elementosss==None:
+            return "No Country"
+        else:
+    
+            especifico=lt.firstElement(elementosss["value"]["song"])
+            ciudad_name=especifico["CapitalName"]
+        
+    else:
+        ciudad_name="No Country"
+   
+
+    
+    return ciudad_name
 
 def length_sin_unidades( service):#TRANSFORMACIÓN COSTO DE GRAFO ID PAIS
     """
@@ -330,6 +377,39 @@ def estructure(name):#ESTRUCTURA MAPA
     return struct
 
 
+def distance_haversine(catalog,lugar1,lugar2):
+    
+    datos_1=m.get(catalog["ciudad_id"],lugar1)
+ 
+
+    datos_2=m.get(catalog["ciudad_id"],lugar2)
+
+  
+    if datos_1==None or datos_2==None:
+        return  1000000000000000000
+    else:
+        dato1= lt.firstElement(datos_1["value"]["song"])
+        dato2= lt.firstElement(datos_2["value"]["song"])
+
+        lugar1=(float(dato1["latitude"]),float(dato1["longitude"]))
+        lugar2=(float(dato2["latitude"]),float(dato2["longitude"]))
+        return float(hs.haversine(lugar1,lugar2))
+
+          
+def distance_haversine_special(catalog,lugar1,lugar2):
+    
+    datos_1=m.get(catalog["ciudad_id"],lugar1)
+    datos_2=m.get(catalog["capital"],lugar2)
+  
+    
+    if datos_1==None or datos_2==None:
+        return  1000000000000000000
+    else:
+        dato1= lt.firstElement(datos_1["value"]["song"])
+        dato2= lt.firstElement(datos_2["value"]["song"])
+        lugar1=(float(dato1["latitude"]),float(dato1["longitude"]))
+        lugar2=(float(dato2["CapitalLatitude"]),float(dato2["CapitalLongitude"]))
+        return float(hs.haversine(lugar1,lugar2))          
 
 
 # Funciones de consulta
@@ -337,14 +417,34 @@ def estructure(name):#ESTRUCTURA MAPA
 def mpsize(catalog):
     return m.size(catalog)
 
+# COMPONENTES DE CONSULTA REQ 1:
+
     
 def connectedComponents(analyzer):
     """
     Calcula los componentes conectados del grafo
     Se utiliza el algoritmo de Kosaraju
     """
-    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
-    return scc.connectedComponents(analyzer['components'])
+    analyzer['connections'] = scc.KosarajuSCC(analyzer['connections'])
+    return scc.connectedComponents(analyzer['connections'])
+
+
+def strongly_conected(catalog,v1,v2):
+    
+    # scc_1=connectedComponents(catalog)
+    
+    return scc.stronglyConnected(catalog,v1,v2)
+    
+#COMPONENTES DE CONSULTA REQ 2:
+#
+
+def getcity(catalog,pais):
+    info_pais=m.get(catalog["info_countries"],pais)
+    if info_pais==None:
+        return None
+    else:
+        elemento=lt.firstElement(info_pais["value"]["song"])
+        return elemento["CapitalName"]
 
 def consulta_conexion_criticos(catalog):
     critic_list=lt.newList(datastructure="ARRAY_LIST")
@@ -371,6 +471,17 @@ def consulta_conexion_criticos(catalog):
     
 
     return critic_list
+
+# REQ3 -------------------------------------------------------------
+def dijkstra_path(catalog,ciudad1): 
+        catalog['paths'] = djk.Dijkstra(catalog['connections'], ciudad1)
+        return catalog
+        
+def dijkstra_llegada(catalog,ciudad2):
+    path = djk.pathTo(catalog['paths'], ciudad2)
+    return path
+
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

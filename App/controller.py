@@ -68,12 +68,14 @@ def loadConnections(catalog):
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
     lastservice=None
-    for service in input_file: 
+    for service in input_file:
+        model.addconnections(catalog,service) 
                
-            model.addConnection_graf(catalog, service)
-            
+        model.addConnection_graf(catalog, service)
+      
+     
         
-    model.addRouteConnections(catalog)
+  
 
     return catalog 
 
@@ -82,17 +84,10 @@ def loadCountries(catalog):
     servicesfile = cf.data_dir + "countries.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-    lastservice=None
+
     for country in input_file:
         model.addcountry(catalog,country)
-        if lastservice is not None:
-            sameservice = lastservice['CountryName'] == country['CountryName']
-            samedirection = lastservice['CapitalName'] == country['CapitalName']
-            samebusStop = lastservice['CapitalName'] == country['CapitalName']
-            if sameservice and samedirection and not samebusStop:
-                model.addConnection_graf(catalog, lastservice, country)
-        lastservice = country
-    model.addRouteConnections(catalog)
+      
 
     #for country in servicesfile:
     return catalog 
@@ -118,6 +113,7 @@ def loadLanding_points(catalog):
     return catalog,inicial,final
 
 # Funciones de ordenamiento
+#REQUERIMIENTOS
 
 # Funciones de consulta sobre el catálogo
 def mpsize(catalog):
@@ -135,3 +131,24 @@ def connectedComponents(analyzer):
     Numero de componentes fuertemente conectados
     """
     return model.connectedComponents(analyzer)
+
+def strongly_conected(catalog,v1,v2):
+
+    T_f= model.strongly_conected(catalog,v1,v2)
+    if  T_f==True:
+        return ("Los componentes están en el mismo cluster.")
+    else:
+        return ("los componentes no están en el mismo cluster.")
+
+
+def req3(catalog,pais1,pais2):
+    ciudad1=model.getcity(catalog,pais1)
+    ciudad2=model.getcity(catalog,pais2)
+   
+    if ciudad2 != None or ciudad1 != None:
+
+        model.dijkstra_path(catalog,ciudad1)
+        min_cost_to_2= model.dijkstra_llegada(catalog,ciudad2)
+        return min_cost_to_2
+    else:
+        return "No se ha encontrado los/el pais que está buscando "

@@ -20,6 +20,7 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+
 import config as cf
 import sys
 import controller
@@ -27,6 +28,7 @@ from DISClib.ADT import list as lt
 assert cf
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
+from DISClib.ADT import stack
 
 
 """
@@ -43,6 +45,8 @@ def print_separador_gigante():
 
 
 def print_carga_de_datos_info(catalog,elemets):
+
+
     print("Cargando información de los archivos ....")
     print_separador_gigante()
     print("Se ha cargado un total de "+ str(gr.numEdges(catalog["connections"]))+" de conexiones entre arcos")
@@ -65,18 +69,24 @@ def print_carga_de_datos_info(catalog,elemets):
     print("-latitud: "+str(elemento_final["latitude"]))
     print("-longitud: "+str(elemento_final["longitude"]))
     print_separador_gigante()
+   
+    
 
 
 
-def print_req1(catalog):
+def print_req1(catalog,v1,v2):
     
     print('El número total de componentes conectados es: ' +
         str(controller.connectedComponents(catalog)))
-    print("Número total de clústeres presentes en la red")
-    print ("Informar si los dos landing points están en el mismo clúster o no.  ")
+  
+    print(str(controller.strongly_conected(catalog["connections"],v1,v2)))
 
 
 def print_req2(catalog):
+
+
+
+
     print("Encontrando los landing point que sirven como punto de interconexión a más cables en la red...")
     lista_puntos_criticos=controller.consulta_conexion_criticos(catalog)
     for element in lt.iterator(lista_puntos_criticos):
@@ -86,11 +96,33 @@ def print_req2(catalog):
         print("Conexiones a landing_point de diferentes cables: "+str(element["conectados"]))
         print_separador_sensillo()
 
+
     
     
-def print_req3():
-    print("Ruta más corta entre")
-    print("Distancia total de la ruta")
+def print_req3(catalog, pais1, pais2):
+
+
+
+    path=controller.req3(catalog,pais1,pais2)
+    
+    if path is not None:
+        if "No se ha encontrado los/el pais que está buscando " not in path:
+            pathlen = stack.size(path)
+            print('El camino es de : ' + str(pathlen)+' km. ')
+            while (not stack.isEmpty(path)):
+                point = stack.pop(path)
+                print(point)
+        else:
+            print(path)
+    else:
+        print("No se ha encontrado un camino")
+
+
+    
+def print_req4(catalog):
+    pass
+
+
 
     
 def printMenu():
@@ -133,7 +165,7 @@ while True:
     elif int(inputs[0]) == 2:
         landing_point1=input("Escriba el nombre del landing point 1: ")
         landing_point2=input("Escriba el nombre del landing point 2: ")
-        print_req1(catalog)
+        print_req1(catalog,landing_point1,landing_point2)
 
 
 
@@ -143,10 +175,11 @@ while True:
 
 
     elif int (inputs[0])==4:
-        pais1=str(input("Escriba el primer país"))
-        pais2=str(input("Escriba el segundo país"))
-        print_req3()
-
+        pais1=str(input("Escriba el primer país "))
+        pais2=str(input("Escriba el segundo país "))
+        print_req3(catalog,pais1,pais2)
+    elif int (inputs[0])==5:
+        print_req4(catalog)
     else:
         sys.exit(0)
 sys.exit(0)
