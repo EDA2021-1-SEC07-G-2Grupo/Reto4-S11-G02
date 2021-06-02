@@ -20,6 +20,7 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+
 import config as cf
 import model
 import csv
@@ -172,3 +173,12 @@ def des_vertice(v):
         return str(v[1])
     else:
         return str(v[0])
+# REQUERIMIENTO 4-----------------------------------------------------------------
+def req4(catalog):
+    prime=model.prim_search(catalog)
+   
+    total_nodos=model.nodos_totales(prime["marked"])
+    costo_total_ruta_min=model.ruta_min(prime)
+    conexion_larga=model.conexion_larga(prime)
+    return total_nodos,costo_total_ruta_min,conexion_larga
+    

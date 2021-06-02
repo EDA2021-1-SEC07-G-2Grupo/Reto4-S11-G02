@@ -36,6 +36,7 @@ from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
+from DISClib.Algorithms.Graphs import prim as prim
 from DISClib.Utils import error as error
 from DISClib.ADT.graph import gr
 import haversine as hs
@@ -496,13 +497,42 @@ def getcity(catalog,pais):
         return elemento["CapitalName"]
 
 def dijkstra_path(catalog,ciudad1): 
-       
+     
         catalog['paths'] = djk.Dijkstra(catalog['connections'], ciudad1)
         return catalog
         
 def dijkstra_llegada(catalog,ciudad2):
     path = djk.pathTo(catalog['paths'], ciudad2)
     return path
+# REQ4
+
+def prim_search(catalog):
+     catalog["prim"] = prim.PrimMST(catalog)
+     return catalog["prim"]
+def nodos_totales(mst):
+    return m.size(mst)
+def ruta_min(mst):
+    mst=mst["distTo"]
+    keys=m.keySet(mst)
+    suma=0.0
+    for elementos in lt.iterator(keys):
+        info = m.get(mst,elementos)
+        if info["value"] >100000000: 
+            suma+=0
+        else:
+
+            suma+=info["value"]
+    return suma
+def conexion_larga(mst):
+    for char in mst:
+        print(char)
+
+        
+
+
+
+
+
 
 
 

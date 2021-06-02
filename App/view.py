@@ -115,23 +115,30 @@ def print_req3(catalog, pais1, pais2):
                 recorrido+=int(point["weight"])
                 print( "Landig Point A: "+str(controller.des_vertice(point["vertexA"]))+", "+" Landig Point B: "+str(controller.des_vertice(point["vertexB"]))+", "+" Distancia: "+str(point["weight"])+" km")
                 print_separador_sensillo()
-            print("El recorrido total es de: "+str(recorrido)+"km")
+            print("El recorrido total es de: "+str(recorrido)+" km")
+            print_separador_gigante()
         else:
-            print_separador_sensillo()
+            
             print(path)
+            print_separador_gigante
            
             
     else:
         print_separador_sensillo()
         print("No se ha encontrado un camino")
+        print_separador_gigante()
 
 
     
 def print_req4(catalog):
-    pass
-
-
-
+    info=controller.req4(catalog["connections"])
+    print("Numero de nodos conectados:"+str(info[0]))
+    print_separador_sensillo()
+    print("Costo total de la red de expanción minima: "+str(info[1]))
+    print_separador_sensillo()
+    print("conexión más larga")
+    print("conexión más corta")
+    
     
 def printMenu():
     print("Bienvenido")
