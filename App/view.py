@@ -75,12 +75,13 @@ def print_carga_de_datos_info(catalog,elemets):
 
 
 def print_req1(catalog,v1,v2):
-    
-    print('El número total de componentes conectados es: ' +
-        str(controller.connectedComponents(catalog)))
-  
-    print(str(controller.strongly_conected(catalog["connections"],v1,v2)))
-
+    print_separador_gigante()
+    elementos_imprimir=controller.req1(catalog,v1,v2)
+    print(elementos_imprimir[1])
+    print_separador_sensillo()
+    print(elementos_imprimir[0])
+    print_separador_sensillo()
+    print_separador_gigante()
 
 def print_req2(catalog):
 
@@ -178,8 +179,12 @@ while True:
         pais1=str(input("Escriba el primer país "))
         pais2=str(input("Escriba el segundo país "))
         print_req3(catalog,pais1,pais2)
+
+
     elif int (inputs[0])==5:
         print_req4(catalog)
+
+
     else:
         sys.exit(0)
 sys.exit(0)

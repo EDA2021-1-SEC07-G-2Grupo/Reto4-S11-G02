@@ -126,20 +126,28 @@ def first_map_element(catalog):
 def consulta_conexion_criticos(catalog):
     return model.consulta_conexion_criticos (catalog) 
 
-def connectedComponents(analyzer):
-    """
-    Numero de componentes fuertemente conectados
-    """
-    return model.connectedComponents(analyzer)
 
-def strongly_conected(catalog,v1,v2):
+    
+
+def req1(catalog,v1,v2):
+
+    cantidad=model.connectedComponents(catalog)
+    cantidad="El número total de componentes conectados es: "+str(cantidad)
+    v1=model.vertices_buscables(catalog,v1)
+    v2=model.vertices_buscables(catalog,v2)
+    
 
     T_f= model.strongly_conected(catalog,v1,v2)
     if  T_f==True:
-        return ("Los componentes están en el mismo cluster.")
-    else:
-        return ("los componentes no están en el mismo cluster.")
-
+        texto= ("Los componentes están en el mismo cluster.")
+        return texto,cantidad
+    elif T_f==0:
+        texto= ("los componentes no están en el mismo cluster.")
+        return texto,cantidad
+    elif T_f== False:
+        texto=("No existe/existen los vertices mencionados")
+        return texto,cantidad
+        
 
 def req3(catalog,pais1,pais2):
     ciudad1=model.getcity(catalog,pais1)

@@ -147,7 +147,7 @@ def addConnection_graf(analyzer, service):
 
         #CONEXIONES
         addConnection(analyzer, origin, destination, distance,"connections")#conexion en las 2 rutas
-        
+        addConnection(analyzer, destination,origin,  distance,"connections")
         distance1=abs(distance_haversine_special(analyzer,origin,pont1))
        
         
@@ -157,6 +157,8 @@ def addConnection_graf(analyzer, service):
        
         addConnection(analyzer, origin, pont1, distance1,"connections")
         addConnection(analyzer, destination, pont2, distance2,"connections")
+        addConnection(analyzer, pont1,origin,  distance1,"connections")
+        addConnection(analyzer, pont2,destination,  distance2, "connections")
         
 
 
@@ -202,7 +204,7 @@ def addConnection(analyzer, origin, destination, distance,name_analyzer):#CREO C
     Adiciona un arco entre dos estaciones
     """
     if  "No city" in origin or "No Country" in destination or "No city" in destination:
-        return analyzer
+        None
     
     else:
         edge = gr.getEdge(analyzer[name_analyzer], str(origin), str(destination))
@@ -425,26 +427,31 @@ def connectedComponents(analyzer):
     Calcula los componentes conectados del grafo
     Se utiliza el algoritmo de Kosaraju
     """
-    analyzer['connections'] = scc.KosarajuSCC(analyzer['connections'])
-    return scc.connectedComponents(analyzer['connections'])
+    analyzer['connections_scc'] = scc.KosarajuSCC(analyzer['connections'])
+  
+    return scc.connectedComponents(analyzer['connections_scc'])
 
 
 def strongly_conected(catalog,v1,v2):
-    
-    # scc_1=connectedComponents(catalog)
-    
-    return scc.stronglyConnected(catalog,v1,v2)
+
+    if m.contains(catalog["connections_scc"]["idscc"],v1)==False or m.contains(catalog["connections_scc"]["idscc"],v2)==False:
+        return False
+    elif  scc.stronglyConnected(catalog["connections_scc"],v1,v2)==False:
+        return 0
+    elif  scc.stronglyConnected(catalog["connections_scc"],v1,v2)==True:
+        return True
+def vertices_buscables(catalog,v):
+    elemento=m.get(catalog["ciudad_id"],v)
+    if elemento==None:
+        return v
+    else:
+       
+        info=lt.firstElement(elemento["value"]["song"])
+        return v+"-"+str(info["landing_point_id"])
     
 #COMPONENTES DE CONSULTA REQ 2:
 #
 
-def getcity(catalog,pais):
-    info_pais=m.get(catalog["info_countries"],pais)
-    if info_pais==None:
-        return None
-    else:
-        elemento=lt.firstElement(info_pais["value"]["song"])
-        return elemento["CapitalName"]
 
 def consulta_conexion_criticos(catalog):
     critic_list=lt.newList(datastructure="ARRAY_LIST")
@@ -473,6 +480,15 @@ def consulta_conexion_criticos(catalog):
     return critic_list
 
 # REQ3 -------------------------------------------------------------
+
+def getcity(catalog,pais):
+    info_pais=m.get(catalog["info_countries"],pais)
+    if info_pais==None:
+        return None
+    else:
+        elemento=lt.firstElement(info_pais["value"]["song"])
+        return elemento["CapitalName"]
+
 def dijkstra_path(catalog,ciudad1): 
         catalog['paths'] = djk.Dijkstra(catalog['connections'], ciudad1)
         return catalog
