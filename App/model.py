@@ -25,7 +25,8 @@
  """
 
 
-from DISClib.DataStructures.arraylist import addLast, firstElement
+from DISClib.ADT.indexminpq import size
+from DISClib.DataStructures.arraylist import addLast, firstElement, newList
 from App.controller import loadCountries
 from typing import ClassVar
 import config as cf
@@ -37,9 +38,11 @@ assert cf
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Algorithms.Graphs import prim as prim
+from DISClib.Algorithms.Graphs import bfs 
 from DISClib.Utils import error as error
 from DISClib.ADT.graph import gr
 import haversine as hs
+from DISClib.Algorithms.Sorting import mergesort as merg
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
 los mismos.
@@ -173,6 +176,7 @@ def addConnection_graf(analyzer, service):
         
         addRouteStop(analyzer, service["\ufefforigin"],service["cable_name"],"stos_cable_name")
         addRouteStop(analyzer, service["destination"],service["cable_name"],"stos_cable_name")
+        
         #COMIENZO DEL GRAFO 2 ------------------------------------------------
        
        
@@ -327,12 +331,12 @@ def pais(catalog,service):#PARA ENCONTRAR EL PAÍS
         lista=m.get(catalog["landing_point_id"],service)
         elemnto=lt.getElement(lista["value"]["song"],1)
         city=elemnto["name"].split(", ")
-        if len(city)==2:
-            ciudad_name=str(city[1])
-            
-
+        if len(city)>2:
+                ciudad_name=city[2]
+        elif len(city)==2:
+                ciudad_name=city[1]
         else:
-            ciudad_name=str(city[0])
+                ciudad_name=city[0]
         elementosss=m.get(catalog["info_countries"],ciudad_name)
         if elementosss==None:
             return "No Country"
@@ -520,18 +524,76 @@ def ruta_min(mst):
         if info["value"] >100000000: 
             suma+=0
         else:
-
             suma+=info["value"]
     return suma
-def conexion_larga(mst):
-    for char in mst:
-        print(char)
+def conexion_larga(catalog,mst):
+  
+    componentes_analisar=lista_normal(mst["distTo"])
+    catalog["mst_distTo_organizado"]=merge_sort(componentes_analisar,lt.size(componentes_analisar),cmpfunction_merge)
+    return lt.firstElement(catalog["mst_distTo_organizado"])
+
+def conexion_corta(catalog):
+    return lt.getElement(catalog["mst_distTo_organizado"],lt.size(catalog["mst_distTo_organizado"]))
+
+
+def lista_normal(mst):
+    normal_list=lt.newList(datastructure="ARRAY_LIST")
+    keys_ss=m.keySet(mst)
+    for element in lt.iterator(keys_ss):
+        lt.addLast(normal_list,m.get(mst,element))
+    return normal_list
 
         
+def cmpfunction_merge(vertex1, vertex2):
+
+    return (float(vertex1["value"]) > float(vertex2["value"]))
+
+def merge_sort(lista,size,cmpfunction_merge):
+    sub_list = lt.subList(lista,0, size)
+    sub_list = lista.copy()
+    sorted_list=merg.sort(sub_list, cmpfunction_merge)
+    return  sorted_list
 
 
+#REQ5
+def exsitencia(catalog,vertice):
+    return m.contains(catalog["destinos"],vertice)
+
+    
+def landing_paises(catalog,lista,vertice):
+    newlist=lt.newList(datastructure="ARRAY_LIST")
+
+    lst_element=[]
+    for element in lt.iterator(lista):
+        distancia=gr.getEdge(catalog["connections"],element,vertice)
+        ciudad=des_vertice(element)
+        lista_grande=m.get(catalog["ciudad_id"],ciudad)
+        if lista_grande!=None:
+            dato=lt.firstElement(lista_grande["value"]["song"])
+            pais=dato["name"].split(",")
+            if len(pais)>2:
+                if  pais[2] not in lst_element:
+                    info={"Pais":str(pais[2]),"Distancia": str(round(float(distancia["weight"]),2))}
+                    lt.addLast(newlist,info)
+                    lst_element.append(pais[2])
+            elif len(pais)==2:
+                if pais[1] not in lst_element:
+                    info={"Pais":str(pais[1]),"Distancia": str(round(float(distancia["weight"]),2))}
+                    lt.addLast(newlist,info)
+                    lst_element.append(pais[1])
+            else:
+                if pais[0] not in lst_element:
+                    info={"Pais":str(pais[0]),"Distancia": str(round(float(distancia["weight"]),2))}
+                    lt.addLast(newlist,info)
+                    lst_element.append(pais[0])
+    return newlist
 
 
+def lista_paises_afectados(vertice,catalog):
+    conexiones_directas= gr.adjacents(catalog["connections"],vertice)
+    transform_landing_to_paises=landing_paises(catalog,conexiones_directas,vertice)
+    return lt.size(transform_landing_to_paises),transform_landing_to_paises
+    
 
 
 

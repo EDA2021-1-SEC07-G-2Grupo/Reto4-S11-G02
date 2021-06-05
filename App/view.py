@@ -73,7 +73,7 @@ def print_carga_de_datos_info(catalog,elemets):
     
 
 
-
+# --------------------------------------------------------------------------------------
 def print_req1(catalog,v1,v2):
     print_separador_gigante()
     elementos_imprimir=controller.req1(catalog,v1,v2)
@@ -83,6 +83,7 @@ def print_req1(catalog,v1,v2):
     print_separador_sensillo()
     print_separador_gigante()
 
+# --------------------------------------------------------------------------------------
 def print_req2(catalog):
 
 
@@ -96,7 +97,7 @@ def print_req2(catalog):
         print_separador_sensillo()
 
 
-    
+ # --------------------------------------------------------------------------------------   
     
 def print_req3(catalog, pais1, pais2):
 
@@ -128,18 +129,39 @@ def print_req3(catalog, pais1, pais2):
         print("No se ha encontrado un camino")
         print_separador_gigante()
 
-
-    
+# --------------------------------------------------------------------------------------
 def print_req4(catalog):
     info=controller.req4(catalog["connections"])
     print("Numero de nodos conectados:"+str(info[0]))
     print_separador_sensillo()
     print("Costo total de la red de expanción minima: "+str(info[1]))
     print_separador_sensillo()
-    print("conexión más larga")
-    print("conexión más corta")
-    
-    
+    print("La conexión más larga es en dirección a "+str(info[2]["key"])+" con un costo de "+str(info[2]["value"]))
+    print_separador_sensillo()
+    print("La conexión más corta es en dirección a "+str(info[3]["key"])+" con un costo de "+str(info[3]["value"]))
+    print_separador_sensillo()
+
+# --------------------------------------------------------------------------------------
+def print_req5(landing_point,catalog):
+   
+    datos=controller.req5(landing_point,catalog)
+    print_separador_sensillo()
+    if datos ==False:
+        print("No existe el vertice que acaba de escribir")
+        print_separador_sensillo()
+    else:
+        
+        print(str(datos[0])+" paises serían afectados si el landing point "+str(landing_point)+" llega a fallar")
+        print_separador_sensillo()
+        print("Los paises directamente afectados serian: ")
+        print_separador_sensillo()
+        
+        for element in lt.iterator(datos[1]):
+            
+                print("-"+str(element["Pais"])+", que está a: "+str(element["Distancia"]+"km"))
+                print_separador_sensillo()
+               
+
 def printMenu():
     print("Bienvenido")
     print("1- Cargar Datos")
@@ -197,6 +219,12 @@ while True:
 
     elif int (inputs[0])==5:
         print_req4(catalog)
+
+
+    elif int(inputs[0])==6:
+        landing_point=str(input("Escriba la ciudad en la que se encuentra el landing point a consultar: "))
+        print_req5(landing_point,catalog)
+
 
 
     else:

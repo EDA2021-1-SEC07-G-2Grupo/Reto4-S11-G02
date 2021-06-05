@@ -68,7 +68,7 @@ def loadConnections(catalog):
     servicesfile = cf.data_dir + "connections.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-    lastservice=None
+    
     for service in input_file:
         model.addconnections(catalog,service) 
                
@@ -117,7 +117,7 @@ def loadLanding_points(catalog):
 #REQUERIMIENTOS
 
 # Funciones de consulta sobre el catálogo
-def mpsize(catalog):
+def mpsize(catalog):                                                                                                    
     return model.mpsize(catalog)
 
 
@@ -179,6 +179,20 @@ def req4(catalog):
    
     total_nodos=model.nodos_totales(prime["marked"])
     costo_total_ruta_min=model.ruta_min(prime)
-    conexion_larga=model.conexion_larga(prime)
-    return total_nodos,costo_total_ruta_min,conexion_larga
+    conexion_larga=model.conexion_larga(catalog,prime)
+    conexion_corta=model.conexion_corta(catalog)
+    return total_nodos,costo_total_ruta_min,conexion_larga,conexion_corta
+
+def req5(landing_point,catalog):
+    landing_point=model.vertices_buscables(catalog,landing_point)
+    confirmacion_existencia_vertice=model.exsitencia(catalog,landing_point)
     
+    if confirmacion_existencia_vertice==False:
+        return False
+     
+
+    elif confirmacion_existencia_vertice==True:
+        datos= model.lista_paises_afectados(landing_point,catalog)
+        return datos[0],datos[1] 
+      
+   
