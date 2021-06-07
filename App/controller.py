@@ -98,12 +98,16 @@ def loadLanding_points(catalog):
     servicesfile = cf.data_dir + "landing_points.csv"
     input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
                                 delimiter=",")
-    for char in input_file:
-        inicial=char
-        break 
-   
+ 
+    h=True
     for landing_pointss in input_file:
         model.addLanding_points(catalog,landing_pointss)
+        inicial=landing_pointss
+        
+        if h==True:
+            inicial=landing_pointss
+            h=False
+        
     
     
     final=landing_pointss
@@ -177,7 +181,7 @@ def des_vertice(v):
 def req4(catalog):
     prime=model.prim_search(catalog)
    
-    total_nodos=model.nodos_totales(prime["marked"])
+    total_nodos=model.nodos_totales(prime)
     costo_total_ruta_min=model.ruta_min(prime)
     conexion_larga=model.conexion_larga(catalog,prime)
     conexion_corta=model.conexion_corta(catalog)

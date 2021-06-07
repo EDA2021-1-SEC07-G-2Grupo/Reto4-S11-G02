@@ -29,6 +29,9 @@ assert cf
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.ADT import stack
+import time
+import tracemalloc
+
 
 
 """
@@ -43,9 +46,47 @@ def print_separador_sensillo():
 def print_separador_gigante():
     print("===========================================================================")
 
+def getTime():
+    """
+    devuelve el instante tiempo de procesamiento en milisegundos
+    """
+    return float(time.perf_counter()*1000)
+
+
+def getMemory():
+    """
+    toma una muestra de la memoria alocada en instante de tiempo
+    """
+    return tracemalloc.take_snapshot()
+
+
+def deltaMemory(start_memory, stop_memory):
+    """
+    calcula la diferencia en memoria alocada del programa entre dos
+    instantes de tiempo y devuelve el resultado en bytes (ej.: 2100.0 B)
+    """
+    memory_diff = stop_memory.compare_to(start_memory, "filename")
+    delta_memory = 0.0
+
+    # suma de las diferencias en uso de memoria
+    for stat in memory_diff:
+        delta_memory = delta_memory + stat.size_diff
+    # de Byte -> kByte
+    delta_memory = delta_memory/1024.0
+    return delta_memory
+
+
+
+
+
+
+
+
+
+
 
 def print_carga_de_datos_info(catalog,elemets):
-
+    
 
     print("Cargando información de los archivos ....")
     print_separador_gigante()
@@ -89,12 +130,17 @@ def print_req2(catalog):
 
     print("Encontrando los landing point que sirven como punto de interconexión a más cables en la red...")
     lista_puntos_criticos=controller.req2(catalog)
+    elementos=0
     for element in lt.iterator(lista_puntos_criticos):
+        elementos+=1
+        if elementos==11:
+            break
         print("Nombre: "+str(element["name"]))
         print("País: "+str(element["Pais"]))
         print("Identificador: "+str(element["identificador"]))
         print("Conexiones a landing_point de diferentes cables: "+str(element["conectados"]))
         print_separador_sensillo()
+    
 
 
  # --------------------------------------------------------------------------------------   
@@ -161,7 +207,9 @@ def print_req5(landing_point,catalog):
                 print("-"+str(element["Pais"])+", que está a: "+str(element["Distancia"]+"km"))
                 print_separador_sensillo()
                
-
+# --------------------------------------------------------------------------------------
+def print_req6(catalog,country):
+    pass
 def printMenu():
     print("Bienvenido")
     print("1- Cargar Datos")
@@ -170,6 +218,7 @@ def printMenu():
     print("4- La ruta de menor distancia")
     print("5- Identificar la Infraestructura Crítica de la Red")
     print("6- Análisis de fallas")
+    print("7- Los mejores canales para transmitir")
 
 
 def initCatalog():
@@ -194,35 +243,62 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
+                
+     
+
         catalog = controller.initCatalog()
         elments=controller.loadData(catalog)
         print_carga_de_datos_info(catalog,elments)
         
 
+
+
     elif int(inputs[0]) == 2:
         landing_point1=input("Escriba el nombre del landing point 1: ")
         landing_point2=input("Escriba el nombre del landing point 2: ")
+
+     
+
+
+
+
         print_req1(catalog,landing_point1,landing_point2)
 
 
 
-
     elif int(inputs[0]) == 3:
+
+  
+
+
         print_req2(catalog)#FUNCIONA
+
+
+
 
 
     elif int (inputs[0])==4:
         pais1=str(input("Escriba el primer país "))
         pais2=str(input("Escriba el segundo país "))
+
+
         print_req3(catalog,pais1,pais2)
+ 
 
 
     elif int (inputs[0])==5:
-        print_req4(catalog)
+        
 
+
+        print_req4(catalog)
+       
 
     elif int(inputs[0])==6:
         landing_point=str(input("Escriba la ciudad en la que se encuentra el landing point a consultar: "))
+
+
+
+
         print_req5(landing_point,catalog)
 
 

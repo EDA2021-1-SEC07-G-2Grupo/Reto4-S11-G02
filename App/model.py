@@ -104,18 +104,41 @@ def addcountry(catalog,country):
         countries=country["CountryName"].split(",")
         for content in countries:
             addMap(catalog, content, country,"info_countries")
-        countries=country["CapitalName"].split(",")
-        addMap(catalog, countries[0], country,"capital")
+        ciudad=country["CapitalName"].split(",")
+      
+            
+        if len(ciudad)==3:
+            ciudad=(str(ciudad[0])+","+str(ciudad[1])+","+str(ciudad[2]))
+        elif len(ciudad)==2:
+            ciudad=(str(ciudad[0])+","+str(ciudad[1]))
+        else:
+            ciudad=str(ciudad[0])
+       
+        addMap(catalog, ciudad, country,"capital")
 
 
 def addLanding_points(catalog,landing_point):
-        lApoints=landing_point["landing_point_id"].split(",")
-        for char in lApoints:
+        lApoints=landing_point["landing_point_id"]
         
-            addMap(catalog,char,landing_point,"landing_point_id")
+        addMap(catalog,lApoints,landing_point,"landing_point_id")
         ciudad=landing_point["name"].split(",")
+        if len(ciudad)==5:
+            ciudad=(str(ciudad[0])+","+str(ciudad[1])+","+str(ciudad[2])+","+str(ciudad[3]))
+        elif len(ciudad)==4:
+            ciudad=(str(ciudad[0])+","+str(ciudad[1])+","+str(ciudad[2]))
+        elif len(ciudad)==3:
+            ciudad=(str(ciudad[0])+","+str(ciudad[1]))
+        elif len(ciudad)==2:
+            ciudad=(str(ciudad[0]))
+        else:
+            ciudad=str(ciudad[0])
+  
+        
+        addMap(catalog,ciudad,landing_point,"ciudad_id")
 
-        addMap(catalog,ciudad[0],landing_point,"ciudad_id")
+
+
+
 
 def addconnections(catalog,service):
     lt.addLast(catalog["original_info"],service)
@@ -152,7 +175,7 @@ def addConnection_graf(analyzer, service):
 
         #CONEXIONES
         addConnection(analyzer, origin, destination, distance,"connections")#conexion en las 2 rutas
-        addConnection(analyzer, destination,origin,  distance,"connections")
+       
         distance1=abs(distance_haversine_special(analyzer,origin,pont1))
        
         
@@ -168,7 +191,7 @@ def addConnection_graf(analyzer, service):
 
 
         addnewpoint(analyzer, origin, destination)#TRABAJANDO EN ESTE PUNTO
-        addnewpoint(analyzer, destination,origin)
+        
         addnewpoint(analyzer, pont1,origin)
         addnewpoint(analyzer, pont2, destination)
         addnewpoint(analyzer,origin, pont1 )
@@ -209,8 +232,10 @@ def addConnection(analyzer, origin, destination, distance,name_analyzer):#CREO C
     """
     Adiciona un arco entre dos estaciones
     """
+    
     if  "No city" in origin or "No Country" in destination or "No city" in destination:
-        None
+    
+        return analyzer
     
     else:
         edge = gr.getEdge(analyzer[name_analyzer], str(origin), str(destination))
@@ -314,12 +339,15 @@ def ciudad(catalog,service):#PARA ENCONTRAR EL PAÍS
         lista=m.get(catalog["landing_point_id"],service)
         elemnto=lt.getElement(lista["value"]["song"],1)
         city=elemnto["name"].split(", ")
-        if len(city)==2:
-            ciudad_name=str(city[0])
+        if len(city)==3:
+            ciudad_name=str(city[0])+", "+str(city[1])
+        elif len(city)==4:
+            ciudad_name=str(city[0])+", "+str(city[1]+", "+str(city[2]))
         else:
             ciudad_name=str(city[0])
     else:
         ciudad_name="No city"
+       
 
     
     return ciudad_name
@@ -331,7 +359,9 @@ def pais(catalog,service):#PARA ENCONTRAR EL PAÍS
         lista=m.get(catalog["landing_point_id"],service)
         elemnto=lt.getElement(lista["value"]["song"],1)
         city=elemnto["name"].split(", ")
-        if len(city)>2:
+        if len(city)==4:
+                ciudad_name=city[3]
+        elif len(city)==3:
                 ciudad_name=city[2]
         elif len(city)==2:
                 ciudad_name=city[1]
@@ -339,7 +369,9 @@ def pais(catalog,service):#PARA ENCONTRAR EL PAÍS
                 ciudad_name=city[0]
         elementosss=m.get(catalog["info_countries"],ciudad_name)
         if elementosss==None:
+            print(ciudad_name)
             return "No Country"
+            
         else:
     
             especifico=lt.firstElement(elementosss["value"]["song"])
@@ -347,6 +379,8 @@ def pais(catalog,service):#PARA ENCONTRAR EL PAÍS
         
     else:
         ciudad_name="No Country"
+        
+        
    
 
     
@@ -395,6 +429,7 @@ def distance_haversine(catalog,lugar1,lugar2):
 
   
     if datos_1==None or datos_2==None:
+    
         return  1000000000000000000
     else:
         dato1= lt.firstElement(datos_1["value"]["song"])
@@ -404,19 +439,35 @@ def distance_haversine(catalog,lugar1,lugar2):
         lugar2=(float(dato2["latitude"]),float(dato2["longitude"]))
         return float(hs.haversine(lugar1,lugar2))
 def des_vertice(v):
-   
+    
     v=v.split("-")
-    return str(v[0])
+    if len(v)==3:
+        
+        return(v[0]+"-"+v[1])
+    elif len(v)==4:
+        
+        return(v[0]+"-"+v[1]+"-"+v[2])
+    elif len(v)==5:
+        
+        return(v[0]+"-"+v[1]+"-"+v[2]+"-"+v[3])
+            
+    else:
+        return str(v[0])
+    
+
           
 def distance_haversine_special(catalog,lugar1,lugar2):
+    
+
     lugar1=des_vertice(lugar1)
-    lugar2=des_vertice(lugar2)
+    lugar2=lugar2
     datos_1=m.get(catalog["ciudad_id"],lugar1)
     datos_2=m.get(catalog["capital"],lugar2)
-  
+    
     
     if datos_1==None or datos_2==None:
-        return  1000000000000000000
+   
+        return  1
     else:
         dato1= lt.firstElement(datos_1["value"]["song"])
         dato2= lt.firstElement(datos_2["value"]["song"])
@@ -487,7 +538,7 @@ def consulta_conexion_criticos(catalog):
                 dato={"identificador":info["key"],"Pais":pais,"name":name,"conectados":str(len(temporary_list)) }
                 lt.addLast(critic_list,dato)
     
-
+    critic_list=merge_sort(critic_list,10,cmpfunction_merge_req2)
     return critic_list
 
 # REQ3 -------------------------------------------------------------
@@ -501,6 +552,7 @@ def getcity(catalog,pais):
         return elemento["CapitalName"]
 
 def dijkstra_path(catalog,ciudad1): 
+    
      
         catalog['paths'] = djk.Dijkstra(catalog['connections'], ciudad1)
         return catalog
@@ -512,9 +564,12 @@ def dijkstra_llegada(catalog,ciudad2):
 
 def prim_search(catalog):
      catalog["prim"] = prim.PrimMST(catalog)
+
      return catalog["prim"]
+
 def nodos_totales(mst):
-    return m.size(mst)
+    return m.size(mst["marked"])
+
 def ruta_min(mst):
     mst=mst["distTo"]
     keys=m.keySet(mst)
@@ -548,10 +603,17 @@ def cmpfunction_merge(vertex1, vertex2):
 
     return (float(vertex1["value"]) > float(vertex2["value"]))
 
-def merge_sort(lista,size,cmpfunction_merge):
+def cmpfunction_merge_req5(vertex1, vertex2):
+
+    return (float(vertex1["Distancia"]) > float(vertex2["Distancia"]))
+def cmpfunction_merge_req2(vertex1, vertex2):
+
+    return (float(vertex1["conectados"]) > float(vertex2["conectados"]))
+
+def merge_sort(lista,size,compare_funct):
     sub_list = lt.subList(lista,0, size)
     sub_list = lista.copy()
-    sorted_list=merg.sort(sub_list, cmpfunction_merge)
+    sorted_list=merg.sort(sub_list, compare_funct)
     return  sorted_list
 
 
@@ -586,6 +648,7 @@ def landing_paises(catalog,lista,vertice):
                     info={"Pais":str(pais[0]),"Distancia": str(round(float(distancia["weight"]),2))}
                     lt.addLast(newlist,info)
                     lst_element.append(pais[0])
+    newlist=merge_sort(newlist,lt.size,cmpfunction_merge_req5)
     return newlist
 
 
