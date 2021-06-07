@@ -289,10 +289,7 @@ def addRouteStop(analyzer, service,name,diccionario):#PARA AÑADIR EN LOS DICCIO
         lstroutes = entry['value']
         
         info = name
-        
-        if info not in lstroutes["first"]["info"] or info not in lstroutes["last"]["info"] :
-           
-            lt.addLast(lstroutes, info)
+        lt.addLast(lstroutes, info)
       
            
     return analyzer
@@ -576,10 +573,8 @@ def ruta_min(mst):
     suma=0.0
     for elementos in lt.iterator(keys):
         info = m.get(mst,elementos)
-        if info["value"] >100000000: 
-            suma+=0
-        else:
-            suma+=info["value"]
+        
+        suma+=info["value"]
     return suma
 def conexion_larga(catalog,mst):
   
@@ -648,7 +643,7 @@ def landing_paises(catalog,lista,vertice):
                     info={"Pais":str(pais[0]),"Distancia": str(round(float(distancia["weight"]),2))}
                     lt.addLast(newlist,info)
                     lst_element.append(pais[0])
-    newlist=merge_sort(newlist,lt.size,cmpfunction_merge_req5)
+  
     return newlist
 
 

@@ -218,7 +218,7 @@ def printMenu():
     print("4- La ruta de menor distancia")
     print("5- Identificar la Infraestructura Crítica de la Red")
     print("6- Análisis de fallas")
-    print("7- Los mejores canales para transmitir")
+ 
 
 
 def initCatalog():
